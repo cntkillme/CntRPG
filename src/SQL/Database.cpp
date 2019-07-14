@@ -1,57 +1,29 @@
-#include "Database.hpp"
+#include "SQL/Database.hpp"
 
 // SQL::Database
 namespace SQL
 {
 	Database::Database(Properties properties)
+	: handle(Create(std::move(properties)), sqlite3_close_v2)
 	{
-		Connect(std::move(properties));
 	}
 
-	Database::Database(Database&& database) noexcept
-	: handle(database.handle)
+	sqlite3* Database::Create(Properties properties)
 	{
-		database.handle = nullptr;
-	}
-
-	Database::~Database() noexcept
-	{
-		Disconnect();
-	}
-
-	void Database::Connect(Properties properties)
-	{
-		if (handle == nullptr)
-			throw SQLException(SQLITE_ERROR, "already connected");
-
 		if (properties.filename == nullptr) {
 			if (properties.memory)
 				properties.filename = ":memory:";
 			else
-				throw SQLException(SQLITE_ERROR, "expected filename");
+				throw Exception(SQLITE_ERROR, "expected filename");
 		}
 
-		int err = sqlite3_open_v2(properties.filename, &handle, properties.GetFlags(), nullptr);
+		sqlite3* database;
+		int err = sqlite3_open_v2(properties.filename, &database, properties.GetFlags(), nullptr);
 
 		if (err != SQLITE_OK)
-			throw SQLException(err);
-	}
+			throw Exception(err);
 
-	void Database::Disconnect() noexcept
-	{
-		sqlite3_close_v2(handle);
-		handle = nullptr;
-	}
-
-	Database::operator bool() const noexcept
-	{
-		return handle != nullptr;
-	}
-
-	Database& Database::operator=(Database&& database) noexcept
-	{
-		handle = database.handle;
-		database.handle = nullptr;
+		return database;
 	}
 }
 

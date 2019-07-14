@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sqlite3.h>
+#include <memory>
 #include "Exception.hpp"
 
 namespace SQL
@@ -12,17 +13,11 @@ namespace SQL
 	class Database
 	{
 		class Properties;
+		friend class Statement;
 
 	public:
-
 		/**
-		 * Creates a disconnected Database object.
-		 */
-		Database() noexcept = default;
-
-		/**
-		 * Creates a connected Database object.
-		 * Equivilent to calling Connect(properties) on a disconnected Database.
+		 * Connects to a database using the given properties.
 		 */
 		Database(Properties properties);
 
@@ -34,42 +29,27 @@ namespace SQL
 		/**
 		 * Move constructor.
 		 */
-		Database(Database&& database) noexcept;
+		Database(Database&& database) noexcept  = default;
 
 		/**
 		 * Disconnects from the connected database.
-		 * Equivilent to calling Disconnect().
 		 */
 		~Database() noexcept;
 
 		/**
-		 * Connects to an SQLite3 database with the given properties.
-		 * Throws SQL::SQLException exception if the connection failed.
-		 */
-		void Connect(Properties properties);
-
-		/**
-		 * Disconnects from the connected database.
-		 */
-		void Disconnect() noexcept;
-
-		/**
-		 * Returns true if there is a connection to a database.
-		 */
-		operator bool() const noexcept;
-
-		/**
 		 * Database objects are not copyable.
 		 */
-		Database& operator=(const Database& database) = delete;
+		Database& operator=(const Database&) = delete;
 
 		/**
 		 * Move assignment operator.
 		 */
-		Database& operator=(Database&& database) noexcept;
+		Database& operator=(Database&& database) noexcept = default;
 
 	private:
-		sqlite3* handle = nullptr;
+		std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> handle;
+
+		static sqlite3* Create(Properties properties);
 
 		/**
 		 * Specifies connection details, allows aggregate initialization.
