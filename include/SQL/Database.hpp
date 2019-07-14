@@ -13,7 +13,24 @@ namespace SQL
 	class Database
 	{
 	public:
-		class Properties;
+		/**
+		 * Specifies connection details, allows aggregate initialization.
+		 * The filename should live until the object is no longer needed.
+		 */
+		struct Properties
+		{
+			const char* filename = "";
+			bool immutable = false;
+			bool memory = false;
+			bool create = false;
+			bool synchronized = false;
+			bool shared = false;
+
+			/**
+			 * Encodes properties into flags to be used in sqlite3_open_v2.
+			 */
+			int GetFlags() const noexcept;
+		};
 
 		/**
 		 * Connects to a database using the given properties.
@@ -46,25 +63,5 @@ namespace SQL
 		std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> handle;
 
 		static sqlite3* Create(Properties properties);
-
-	public:
-		/**
-		 * Specifies connection details, allows aggregate initialization.
-		 * The filename should live until the object is no longer needed.
-		 */
-		struct Properties
-		{
-			const char* filename = "";
-			bool immutable = false;
-			bool memory = false;
-			bool create = false;
-			bool synchronized = false;
-			bool shared = false;
-
-			/**
-			 * Encodes properties into flags to be used in sqlite3_open_v2.
-			 */
-			int GetFlags() const noexcept;
-		};
 	};
 }
