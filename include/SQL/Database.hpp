@@ -32,11 +32,6 @@ namespace SQL
 		Database(Database&& database) noexcept  = default;
 
 		/**
-		 * Disconnects from the connected database.
-		 */
-		~Database() noexcept;
-
-		/**
 		 * Database objects are not copyable.
 		 */
 		Database& operator=(const Database&) = delete;
