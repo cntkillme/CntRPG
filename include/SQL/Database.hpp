@@ -51,6 +51,7 @@ namespace SQL
 
 		static sqlite3* Create(Properties properties);
 
+	public:
 		/**
 		 * Specifies connection details, allows aggregate initialization.
 		 * The filename should live until the object is no longer needed.
