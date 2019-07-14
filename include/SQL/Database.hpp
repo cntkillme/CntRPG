@@ -12,10 +12,9 @@ namespace SQL
 	 */
 	class Database
 	{
-		class Properties;
-		friend class Statement;
-
 	public:
+		class Properties;
+
 		/**
 		 * Connects to a database using the given properties.
 		 */
@@ -42,6 +41,8 @@ namespace SQL
 		Database& operator=(Database&& database) noexcept = default;
 
 	private:
+		friend class Statement;
+
 		std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> handle;
 
 		static sqlite3* Create(Properties properties);
