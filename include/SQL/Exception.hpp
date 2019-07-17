@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
-
 namespace SQL
 {
 	class Exception : public std::exception

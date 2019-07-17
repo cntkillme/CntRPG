@@ -1,9 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <string>
-#include <sqlite3.h>
-#include "Exception.hpp"
+#include "Deleter.hpp"
 
 namespace SQL
 {
@@ -21,37 +18,21 @@ namespace SQL
 		 */
 		Statement(Database& database, std::string query, bool persistent = false);
 
-		/**
-		 * Statement objects are not copyable.
-		 */
-		Statement(const Statement&) = delete;
-
-		/**
-		 * Move constructor.
-		 */
-		Statement(Statement&& statement) noexcept = default;
-
 		// todo: Bind(int, T&&)
 		// todo: Bind(const char*, T&&)
-		// todo: execute, step, results
-		// todo: clear bindings, reset
+		// todo: step/execute
 		// todo: operator bool (returns true if has more rows)
 
 		/**
-		 * Statement objects are not copyable.
+		 * Resets the statement and optionally clears all bindings.
 		 */
-		Statement& operator=(const Statement&) = delete;
-
-		/**
-		 * Move assignment operator.
-		 */
-		Statement& operator=(Statement&& statement) noexcept = default;
+		void Reset(bool clearBindings = true) noexcept;
 
 	private:
+		static sqlite3_stmt* Create(Database& database, std::string query, bool persistent);
+
 		Database& database;
 
-		std::unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> handle;
-
-		static sqlite3_stmt* Create(Database& database, std::string query, bool persistent);
+		std::unique_ptr<sqlite3_stmt, DeleterFactory<sqlite3_stmt, sqlite3_finalize>> handle;
 	};
 }

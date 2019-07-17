@@ -1,9 +1,6 @@
 #pragma once
 
-#include <string>
-#include <sqlite3.h>
-#include <memory>
-#include "Exception.hpp"
+#include "Deleter.hpp"
 
 namespace SQL
 {
@@ -15,11 +12,10 @@ namespace SQL
 	public:
 		/**
 		 * Specifies connection details, allows aggregate initialization.
-		 * The filename should live until the object is no longer needed.
 		 */
 		struct Properties
 		{
-			const char* filename = "";
+			std::string filename = "";
 			bool immutable = false;
 			bool memory = false;
 			bool create = false;
@@ -34,34 +30,15 @@ namespace SQL
 
 		/**
 		 * Connects to a database using the given properties.
+		 * Throws SQL::Exception with the SQLite3 error code if connection failed.
 		 */
 		Database(Properties properties);
-
-		/**
-		 * Database objects are not copyable.
-		 */
-		Database(const Database&) = delete;
-
-		/**
-		 * Move constructor.
-		 */
-		Database(Database&& database) noexcept  = default;
-
-		/**
-		 * Database objects are not copyable.
-		 */
-		Database& operator=(const Database&) = delete;
-
-		/**
-		 * Move assignment operator.
-		 */
-		Database& operator=(Database&& database) noexcept = default;
 
 	private:
 		friend class Statement;
 
-		std::unique_ptr<sqlite3, decltype(&sqlite3_close_v2)> handle;
-
 		static sqlite3* Create(Properties properties);
+
+		std::unique_ptr<sqlite3, DeleterFactory<sqlite3, sqlite3_close_v2>> handle;
 	};
 }

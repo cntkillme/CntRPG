@@ -1,4 +1,4 @@
-#include <sqlite3.h>
+#include "PrecompiledHeader.hpp"
 #include "SQL/Exception.hpp"
 
 // SQL::Exception

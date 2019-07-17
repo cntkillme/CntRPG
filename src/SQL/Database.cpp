@@ -1,24 +1,22 @@
+#include "PrecompiledHeader.hpp"
 #include "SQL/Database.hpp"
+#include "SQL/Exception.hpp"
 
 // SQL::Database
 namespace SQL
 {
 	Database::Database(Properties properties)
-	: handle(Create(std::move(properties)), sqlite3_close_v2)
+	: handle(Create(std::move(properties)))
 	{
 	}
 
 	sqlite3* Database::Create(Properties properties)
 	{
-		if (properties.filename == nullptr) {
-			if (properties.memory)
+		if (properties.filename == "" && properties.memory)
 				properties.filename = ":memory:";
-			else
-				throw Exception(SQLITE_ERROR, "expected filename");
-		}
 
 		sqlite3* database;
-		int err = sqlite3_open_v2(properties.filename, &database, properties.GetFlags(), nullptr);
+		int err = sqlite3_open_v2(properties.filename.data(), &database, properties.GetFlags(), nullptr);
 
 		if (err != SQLITE_OK)
 			throw Exception(err);

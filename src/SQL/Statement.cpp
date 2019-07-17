@@ -1,14 +1,23 @@
-#include <utility>
-#include "SQL/Database.hpp"
+#include "PrecompiledHeader.hpp"
 #include "SQL/Statement.hpp"
+#include "SQL/Database.hpp"
+#include "SQL/Exception.hpp"
 
 // SQL::Statement
 namespace SQL
 {
 	Statement::Statement(Database& database, std::string query, bool persistent)
 	: database(database)
-	, handle(Create(database, std::move(query), persistent), &sqlite3_finalize)
+	, handle(Create(database, std::move(query), persistent))
 	{
+	}
+
+	void Statement::Reset(bool clearBindings) noexcept
+	{
+		sqlite3_reset(handle.get());
+
+		if (clearBindings)
+			sqlite3_clear_bindings(handle.get());
 	}
 
 	sqlite3_stmt* Statement::Create(Database& database, std::string query, bool persistent)
