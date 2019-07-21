@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PrecompiledHeader.hpp"
-
 /**
  * Generates a stateless Deleter type to be used for smart pointers which are to be destruced by a free function.
  */

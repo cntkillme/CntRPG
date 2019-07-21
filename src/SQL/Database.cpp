@@ -10,6 +10,11 @@ namespace SQL
 	{
 	}
 
+	Database::operator sqlite3*() noexcept
+	{
+		return handle.get();
+	}
+
 	sqlite3* Database::Create(Properties properties)
 	{
 		if (properties.filename == "" && properties.memory)

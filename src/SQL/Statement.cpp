@@ -1,7 +1,7 @@
 #include "PrecompiledHeader.hpp"
+#include "SQL/Exception.hpp"
 #include "SQL/Statement.hpp"
 #include "SQL/Database.hpp"
-#include "SQL/Exception.hpp"
 
 // SQL::Statement
 namespace SQL
@@ -18,6 +18,11 @@ namespace SQL
 
 		if (clearBindings)
 			sqlite3_clear_bindings(handle.get());
+	}
+
+	Statement::operator sqlite3_stmt*() noexcept
+	{
+		return handle.get();
 	}
 
 	sqlite3_stmt* Statement::Create(Database& database, std::string query, bool persistent)

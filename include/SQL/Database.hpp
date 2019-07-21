@@ -34,6 +34,11 @@ namespace SQL
 		 */
 		Database(Properties properties);
 
+		/**
+		 * Implicit conversion to allow usage of this object directly by the C API.
+		 */
+		operator sqlite3*() noexcept;
+
 	private:
 		friend class Statement;
 
