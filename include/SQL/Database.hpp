@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Deleter.hpp"
+#include "Exception.hpp"
+#include "Utility.hpp"
 
 namespace SQL
 {
@@ -44,6 +45,6 @@ namespace SQL
 
 		static sqlite3* Create(Properties properties);
 
-		std::unique_ptr<sqlite3, DeleterFactory<sqlite3, sqlite3_close_v2>> handle;
+		std::unique_ptr<sqlite3, Utility::MonostateFunction<sqlite3_close_v2>> handle;
 	};
 }

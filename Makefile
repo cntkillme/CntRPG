@@ -9,7 +9,7 @@ PRECOMPILED_HEADERS :=
 
 all: $(PRECOMPILED_HEADER).gch
 	# to-do: proper handling of source files
-	$(CXX) -o "$(TARGET)" src/SQL/*.cpp
+	$(CXX) -o "$(TARGET)" src/SQL/*.cpp tests/SQL.cpp
 
 clean:
 	rm -f program.out
