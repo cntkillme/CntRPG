@@ -21,6 +21,11 @@ namespace SQL
 		Statement(Database& database, std::string_view query, bool persistent = false);
 
 		/**
+		 * Returns a map of column names to their index.
+		 */
+		std::unordered_map<std::string, int> GetColumns();
+
+		/**
 		 * Binds a value to the given bind parameter index (1-based).
 		 */
 		template<typename ValueType>
@@ -35,7 +40,7 @@ namespace SQL
 		}
 
 		/**
-		 * Binds a value to the given bind parameter name (1-based).
+		 * Binds a value to the given bind parameter name.
 		 */
 		template<typename ValueType>
 		Statement& Bind(const char* name, ValueType&& value)
@@ -51,7 +56,7 @@ namespace SQL
 		}
 
 		/**
-		 * Binds multiple parameters at once starting from the given parameter index (1-based).
+		 * Binds multiple parameters starting from the given parameter index (1-based).
 		 */
 		template<typename... ValueTypes>
 		Statement& BindMany(int parameter, ValueTypes&&... values)
@@ -84,6 +89,7 @@ namespace SQL
 		std::tuple<std::optional<ValueTypes>...> Results(int column = 0)
 		{
 			static_assert(sizeof...(ValueTypes) > 0, "expected at least 1 type");
+
 			return ResultsImpl<ValueTypes...>(column,
 				std::make_index_sequence<sizeof...(ValueTypes)>());
 		}

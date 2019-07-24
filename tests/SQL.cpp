@@ -30,6 +30,20 @@ int main(int argc, char** argv)
 	{
 		SQL::Statement fetch(database, "SELECT * FROM dab");
 
+		{
+			fetch.Step();
+
+			auto columns = fetch.GetColumns();
+			std::cout << "Columns:\n";
+
+			for (auto&& [v, k] : columns)
+				std::cout << k << " at index " << v << "\n";
+
+			fetch.Reset();
+		}
+
+		std::cout << "\n";
+
 		fetch.Execute([](SQL::Statement& statement, long row) {
 			auto [id, name, cash] = statement.Results<long long, std::string, double>();
 

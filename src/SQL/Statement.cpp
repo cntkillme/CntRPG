@@ -11,6 +11,19 @@ namespace SQL
 	{
 	}
 
+	std::unordered_map<std::string, int> Statement::GetColumns()
+	{
+		if (!hasRow)
+			throw SQL::Exception(SQLITE_ERROR, "no row available");
+
+		std::unordered_map<std::string, int> columns;
+
+		for (int index = 0; index < sqlite3_column_count(handle.get()); index++)
+			columns[sqlite3_column_origin_name(handle.get(), index)] = index;
+
+		return columns;
+	}
+
 	bool Statement::Step()
 	{
 		int err = sqlite3_step(handle.get());
