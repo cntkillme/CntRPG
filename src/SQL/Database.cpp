@@ -6,9 +6,7 @@
 namespace SQL
 {
 	Database::Database(Properties properties)
-	: handle(Create(std::move(properties)))
-	{
-	}
+	: handle(Create(std::move(properties))) { }
 
 	Database::operator sqlite3*() noexcept
 	{

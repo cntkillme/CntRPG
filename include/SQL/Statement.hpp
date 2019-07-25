@@ -32,7 +32,7 @@ namespace SQL
 		Statement& Bind(int parameter, ValueType&& value)
 		{
 			if (parameter > 0 && parameter <= sqlite3_bind_parameter_count(handle.get()))
-				Bridge<ValueType>::bind(handle.get(), parameter, std::forward<ValueType>(value));
+				Implementation::Bridge<ValueType>::Bind(handle.get(), parameter, std::forward<ValueType>(value));
 			else
 				throw SQL::Exception(SQLITE_MISMATCH, std::string("bad parameter index ") + std::to_string(parameter));
 
@@ -48,7 +48,7 @@ namespace SQL
 			int index = sqlite3_bind_parameter_index(handle.get(), name);
 
 			if (index > 0)
-				Bridge<ValueType>::bind(handle.get(), index, std::forward<ValueType>(value));
+				Implementation::Bridge<ValueType>::Bind(handle.get(), index, std::forward<ValueType>(value));
 			else
 				throw SQL::Exception(SQLITE_MISMATCH, std::string("bad parameter name ") + name);
 
@@ -71,13 +71,13 @@ namespace SQL
 		 * Fetches the value stored in the given column (0-based).
 		 */
 		template<typename ValueType>
-		std::optional<ValueType> Result(int column)
+		std::optional<typename StripBlob<ValueType>::type> Result(int column)
 		{
 			if (!hasRow)
 				throw SQL::Exception(SQLITE_ERROR, "no row available");
 
 			if (column >= 0 && column < sqlite3_column_count(handle.get()))
-				return Bridge<ValueType>::result(handle.get(), column);
+				return Implementation::Bridge<ValueType>::Result(handle.get(), column);
 			else
 				throw SQL::Exception(SQLITE_MISMATCH, std::string("bad column index ") + std::to_string(column));
 		}
@@ -86,7 +86,7 @@ namespace SQL
 		 * Fetches multiple values starting from the given column (0-based).
 		 */
 		template<typename... ValueTypes>
-		std::tuple<std::optional<ValueTypes>...> Results(int column = 0)
+		std::tuple<std::optional<typename StripBlob<ValueTypes>::type>...> Results(int column = 0)
 		{
 			static_assert(sizeof...(ValueTypes) > 0, "expected at least 1 type");
 
@@ -148,7 +148,7 @@ namespace SQL
 		}
 
 		template<typename... ValueTypes, std::size_t... Indexes>
-		std::tuple<std::optional<ValueTypes>...> ResultsImpl(int column, std::index_sequence<Indexes...>)
+		std::tuple<std::optional<typename StripBlob<ValueTypes>::type>...> ResultsImpl(int column, std::index_sequence<Indexes...>)
 		{
 			return { Result<ValueTypes>(column + Indexes)... };
 		}

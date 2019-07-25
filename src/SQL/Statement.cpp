@@ -7,9 +7,7 @@ namespace SQL
 {
 	Statement::Statement(Database& database, std::string_view query, bool persistent)
 	: database(database)
-	, handle(Create(database, std::move(query), persistent))
-	{
-	}
+	, handle(Create(database, std::move(query), persistent)) { }
 
 	std::unordered_map<std::string, int> Statement::GetColumns()
 	{
