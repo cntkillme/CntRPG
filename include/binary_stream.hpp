@@ -1,6 +1,8 @@
 #pragma once
 
-#include "PrecompiledHeader.hpp"
+#include <sstream>
+#include <type_traits>
+#include <utility>
 
 class BinaryStream
 {

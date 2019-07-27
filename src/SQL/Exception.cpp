@@ -1,3 +1,4 @@
+/*
 #include "PrecompiledHeader.hpp"
 #include "SQL/Exception.hpp"
 
@@ -26,3 +27,4 @@ namespace SQL
 		return errorCode;
 	}
 }
+*/

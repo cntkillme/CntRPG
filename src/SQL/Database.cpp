@@ -1,46 +1,54 @@
-#include "PrecompiledHeader.hpp"
-#include "SQL/Database.hpp"
-#include "SQL/Exception.hpp"
-
-// SQL::Database
-namespace SQL
+#include "sql/Database.hpp"
+/*
+namespace sql
 {
-	Database::Database(Properties properties)
-	: handle(Create(std::move(properties))) { }
-
-	Database::operator sqlite3*() noexcept
+	Database::Database(const char* filename, int flags) noexcept
 	{
-		return handle.get();
+		connect(filename, flags).unwrap();
 	}
 
-	sqlite3* Database::Create(Properties properties)
+	result_code Database::connect(const char* filename, int flags) noexcept
 	{
-		if (properties.filename == "" && properties.memory)
-				properties.filename = ":memory:";
+		if (*this) // already connected
+			return error(SQLITE_MISUSE, "connection already established");
 
-		sqlite3* database;
-		int err = sqlite3_open_v2(properties.filename.data(), &database, properties.GetFlags(), nullptr);
+		sqlite3* dbHandle;
+		int errorCode = sqlite3_open_v2(filename, &dbHandle, flags, nullptr);
 
-		if (err != SQLITE_OK)
-			throw Exception(err);
+		if (errorCode != SQLITE_OK)
+			return error(errorCode, sqlite3_errstr(errorCode));
 
-		return database;
+		m_dbHandle.reset(dbHandle);
+
+		return result_code::ok();
+	}
+
+	void Database::disconnect() noexcept
+	{
+		sqlite3_close_v2(m_dbHandle.release());
+	}
+
+
+	result_code Database::execute(const char* query) noexcept
+	{
+		if (!*this) // not connected
+			return error(SQLITE_MISUSE, "no connection established");
+
+		char* sqliteErrorMessage;
+		int errorCode = sqlite3_exec(m_dbHandle.get(), query, nullptr, nullptr, &sqliteErrorMessage);
+
+		if (errorCode != SQLITE_OK) {
+			std::string errorMessage(sqliteErrorMessage);
+			sqlite3_free(sqliteErrorMessage);
+			return error(errorCode, std::move(errorMessage));
+		}
+
+		return result_code::ok();
+	}
+
+	Database::operator bool() const noexcept
+	{
+		return m_dbHandle.get() != nullptr;
 	}
 }
-
-// SQL::Database::Properties
-namespace SQL
-{
-	int Database::Properties::GetFlags() const noexcept
-	{
-		int flags = 0;
-
-		flags |= immutable ? SQLITE_READONLY : SQLITE_OPEN_READWRITE;
-		flags |= memory ? SQLITE_OPEN_MEMORY : 0;
-		flags |= create ? SQLITE_OPEN_CREATE : 0;
-		flags |= synchronized ? SQLITE_OPEN_FULLMUTEX : SQLITE_OPEN_NOMUTEX;
-		flags |= shared ? SQLITE_OPEN_SHAREDCACHE : SQLITE_OPEN_PRIVATECACHE;
-
-		return flags;
-	}
-}
+*/
