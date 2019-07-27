@@ -59,10 +59,13 @@ namespace sql
 		/**
 		 * @brief Constructs an attached Statement object.
 		 * @param database the database that the statement will be attached to.
-		 * @param query
+		 * @param query the query to initialize the statement with.
 		 */
 		explicit Statement(Database& database, std::string query = std::string()) noexcept;
 
+		/**
+		 * 
+		 */
 		void attach(Database& database);
 
 		void detach() noexcept;
