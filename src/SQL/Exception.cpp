@@ -1,30 +1,27 @@
-/*
-#include "PrecompiledHeader.hpp"
-#include "SQL/Exception.hpp"
+#include <sqlite3.h>
+#include "sql/Exception.hpp"
 
-// SQL::Exception
-namespace SQL
+namespace sql
 {
 	Exception::Exception(int errorCode) noexcept
-	: errorCode(errorCode)
-	, message(sqlite3_errstr(errorCode))
+	: mErrorCode(errorCode)
+	, mErrorMessage(sqlite3_errstr(errorCode))
 	{
 	}
 
 	Exception::Exception(int errorCode, std::string message) noexcept
-	: errorCode(errorCode)
-	, message(std::move(message))
+	: mErrorCode(errorCode)
+	, mErrorMessage(std::move(message))
 	{
 	}
 
 	const char* Exception::what() const noexcept
 	{
-		return message.data();
+		return mErrorMessage.data();
 	}
 
 	int Exception::code() const noexcept
 	{
-		return errorCode;
+		return mErrorCode;
 	}
 }
-*/

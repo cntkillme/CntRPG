@@ -4,11 +4,11 @@
 A compiler with C++17 support is required (recommended: gcc-7 or later).
 
 ## To-Do
-1. Design and Implement `sql::Exception`.
-1. Design `sql::Statement` (bind/result method placeholders).
-2. Implement `sql::Database` and `sql::Statement`.
-3. Implement `sql::Value`, finish implementing `sql::Statement` bind/result methods. 
-4. ...
+1. ~~Design and Implement `sql::Exception`.~~ Done
+2. Design `sql::Statement` (bind/result method placeholders).
+3. Implement `sql::Database` and `sql::Statement`.
+4. Implement `sql::Value`, finish implementing `sql::Statement` bind/result methods. 
+5. ...
 
 ## sql::Value<T> Interface
 ```cpp
