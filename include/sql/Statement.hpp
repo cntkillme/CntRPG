@@ -14,37 +14,37 @@ namespace sql
 	class Database;
 
 	/**
-	 * @brief SQLite3 statement wrapped.
+	 * @brief SQLite3 statement wrapper.
 	 *
 	 * This class exposes a modern C++ interface to an SQLite3 statement.
 	 * The UTF-16 encoding scheme is not supported.
 	 * The underlying SQLite3 statement is finalized on destruction.
 	 *
-	 * A database must be specified before the Bind, Row, and Done states. A call to attach is only valid in the
-	 *  SQL state, else an exception will be thrown.
-	 * Altering the SQL query is only valid in the SQL state, else an exception will be thrown.
-	 * For information about state transitions, see Statement::State.
+	 * A database must be specified before any binding or evaluation can take place.
 	 */
 	class Statement
 	{
-	public:
+	private:
 		/**
 		 * @brief Describes the current state of the Statement.
 		 *
 		 * Statement progression is handled through a state machine with the following transititons:
-		 *  SQL -> SQL on alteration of the underlying SQL queryL.
+		 *  SQL -> SQL on alteration of the SQL query.
 		 *  Bind/Row/Done -> SQL on a call to clearBindings.
 		 *  SQL/Bind -> Bind on a call to bind.
 		 *  Row/Done -> Bind on a call to reset.
 		 *  SQL/Bind/Row/Done -> Row on a call to step if a row of data is available.
 		 *  SQL/Bind/Row/Done -> Done on a call to step/execute if no row of data is available.
+		 * 
+		 * The statement is in an "initialized" state if the sqlite3_stmt object has been created. This is
+		 *  guaranteed when the statement's state is either Bind, Row, or Done.
 		 */
 		enum class State
 		{
-			SQL, ///< The underlying SQL query is alterable.
-			Bind, ///< The .
-			Row, ///< The statement has a row of data available.
-			Done ///< The statement has been fully evaluated.
+			SQL, ///< The SQL query is alterable.
+			Bind, ///< The SQL query is fixed.
+			Row, ///< A row of data is available.
+			Done ///< The statement is fully evaluated.
 		};
 
 	public:
@@ -64,22 +64,69 @@ namespace sql
 		explicit Statement(Database& database, std::string query = std::string()) noexcept;
 
 		/**
-		 * 
+		 * @brief Returns whether the statement is initialized.
+		 * @return true if the statement is initialized, false otherwise.
+		 */
+		bool initialized() const noexcept;
+		
+		/**
+		 * @brief Returns a reference to the associated database.
+		 * @return The database.
+		 * @throw Exception if no database is available.
+		 */
+		Database& database();
+		
+		/**
+		 * @brief Returns a constant reference to the associated database.
+		 * @return The database.
+		 * @throw Exception if no database is available.
+		 */
+		const Database& database() const;
+
+		/**
+		 * @brief Clears the SQL query.
+		 * @throw Exception if the statement is initialized.
+		 */
+		void clear();
+		
+		/**
+		 * @brief Clears all bindings. Does nothing if the statement is not initialized.
+		 */
+		void clearBindings() noexcept;
+
+		/**
+		 * @brief Resets the statement. Does nothing if the statement is not initialized.
+		 */
+		void reset() noexcept;
+		
+		/**
+		 * @brief Associates the statement with a database.
+		 * @param database the database.
+		 * @throw Exception if the statement is initialized.
 		 */
 		void attach(Database& database);
 
-		void detach() noexcept;
+		/**
+		 * @brief Disassociates the statement from the database.
+		 * @throw Exception if the statement is initialized.
+		 */
+		void detach();
 
-		Database& database();
+		/**
+		 * @brief Returns the SQL query.
+		 * @return The SQL query.
+		 */
+		const std::string& query() const noexcept;
 
-		const Database& database() const;
+		// invoke reset if state is done
+		/**
+		 * @brief Evaluate the query to the next row.
+		 * 
+		 */
+		void next();
 
-		Statement& operator<<(std::string_view sql);
-
-		// implicitly invoke reset if the state is Row or Done.
-		void clearBindings() noexcept;
-
-		void reset() noexcept;
+		// invoke reset if state is row or done
+		void run();
 
 		template<typename T>
 		void bind(int index, T&& value);
@@ -87,11 +134,14 @@ namespace sql
 		template<typename T>
 		void bind(std::string_view parameter, T&& value);
 
-		// invoke reset if state is done
-		void next();
 
-		// invoke reset if state is row or done
-		void run();
+		/**
+		 * @brief Appends to the SQL query.
+		 * @param sql SQL to append.
+		 * @return The statement.
+		 * @throws Exception if the statement is not reset.
+		 */
+		Statement& operator<<(std::string_view sql);
 
 		template<typename T>
 		std::optional<T> result(int column);
@@ -100,9 +150,12 @@ namespace sql
 		std::tuple<std::optional<Ts>...> results(int firstColumn = 0);
 
 	private:
+		void assertInitialized(bool expected, std::optional<std::string> errorMessage = std::nullopt) const;
+
+	private:
 		State mState = State::SQL;
 		Database* mDatabase;
 		std::string mQuery;
 		std::unique_ptr<sqlite3_stmt, monostate_function<sqlite3_finalize>> mStmtHandle;
-	}
+	};
 }

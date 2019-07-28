@@ -66,6 +66,8 @@ namespace sql
 		 * @param filename database filename (UTF-8).
 		 * @param flags database open flags.
 		 * @return The result code.
+		 * @throw Exception with SQLITE_MISUSE if a connection is already established.
+		 * @throw Exception with the error code if connection failed.
 		 */
 		void connect(const char* filename, int flags = DEFAULT);
 
@@ -78,6 +80,8 @@ namespace sql
 		 * @brief Executes semicolon-sepeareted SQL statements in a single call. For more control, use SQL::Statement.
 		 * @param query SQL statements to be executed.
 		 * @returns The result code.
+		 * @throw Exception with SQLITE_MISUSE if no connection is established.
+		 * @throw Exception with the error code if execution failed.
 		 */
 		void execute(const char* query);
 
